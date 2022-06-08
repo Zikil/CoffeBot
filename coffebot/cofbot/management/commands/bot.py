@@ -59,7 +59,7 @@ class Command(BaseCommand):
         text = 'Ваши заказы:'
         for buy in buys:
             o = Order.objects.filter(Buying=buy.id)
-            text += f'\nЗаказ номер {buy.id} стоимостью {buy.Cost} когда-то: \n'
+            text += f'\nЗаказ {buy.Datetime.strftime("%d %B %Y в %H:%M")} стоимостью {buy.Cost}:\n'
             for i in o:
                 print(i)
                 text += f'·{i.Product.Name} количество:{i.Count} цена:{i.Product.Price} \n'
