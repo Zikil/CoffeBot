@@ -177,6 +177,10 @@ def create_order_form(request):  # form for create order
     return render(request, 'coffeshop/partials/order_form.html', context)
     
 
-def get_customer(request, pk):
+def get_customer(request):
+    pk = request.GET.get('cus')
     cus = get_object_or_404(Profile, id=pk)
-    return str(cus.score)
+    context = {
+        'cus': cus,
+    }
+    return render(request, 'coffeshop/partials/get_customer.html', context)
