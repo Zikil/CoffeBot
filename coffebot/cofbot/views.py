@@ -52,10 +52,10 @@ def create_order(request, pk):  # create order, select product, customer
                 b = buy.Barista
             except:
                 print('error!1')
-                error = 'Add Customer or Barista!'
+                error = 'Add Customer or/and Barista!'
                 context['error'] = error
                 return render(request, 'coffeshop/create_order.html', context)
-            buy.id = pk
+            buy.id = buy.Check = pk
             cost = 0
             c = 0
             for order in orders:

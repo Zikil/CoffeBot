@@ -16,7 +16,7 @@ class OrderForm(forms.ModelForm):
 class BuyingForm(forms.ModelForm):
     class Meta:
         model = Buying
-        fields = ('Customer', 'Barista')
+        fields = ('Customer',)
 
     widgets = {
             # 'author': forms.TextInput(attrs={'class': 'form-control'}),

@@ -1,11 +1,12 @@
 from datetime import datetime
+from tkinter import CASCADE
 from django.db import models
-from django.db.models.deletion import PROTECT
+from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
+from django.db.models.deletion import PROTECT, CASCADE
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-# Create your models here.
-
-
-#----------
 
 class Profile(models.Model):  # Customer
     tg_id = models.PositiveIntegerField(unique=True)
@@ -24,15 +25,22 @@ class Message(models.Model):
         return f'Сообщение {self.text} от {self.profile}'
 
 class Barista(models.Model):
-    ID_barista = models.PositiveIntegerField(primary_key=True)
-    Full_name = models.CharField(max_length=200)
-    Birthday = models.DateField()
-    Phone_number = models.PositiveBigIntegerField()
-    Addres = models.TextField()
+    User = models.OneToOneField(User, on_delete=CASCADE)
+    Birthday = models.DateField(null=True, blank=True)
+    Phone_number = models.PositiveBigIntegerField(blank=True, default=0)
+    Addres = models.TextField(blank=True)
     
     def __str__(self):
-        return self.Full_name
+        return self.User.__str__()
 
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Barista.objects.create(User=instance, Full_name=str(instance.first_name) + str(instance.last_name))
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.barista.save()
 
 
 def get_barista_today():
@@ -61,15 +69,14 @@ class Product(models.Model):
         return f'{self.Name} -- {self.Price}'
 
 class Order(models.Model):
-    Buying = models.ForeignKey(Buying, on_delete=PROTECT)
-    Product = models.ForeignKey(Product, on_delete=PROTECT)
+    Buying = models.ForeignKey(Buying, on_delete=CASCADE)
+    Product = models.ForeignKey(Product, on_delete=CASCADE)
     Count = models.PositiveIntegerField(default=1)
     
     def __str__(self):
         return str(self.Buying) + str(self.Product)
 
 class Ingredients(models.Model):
-    # ID_ingred = models.PositiveIntegerField()
     Name = models.CharField(max_length=200)
     Count = models.IntegerField()
 
