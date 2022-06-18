@@ -9,7 +9,11 @@ urlpatterns = [
     path('buying/<pk>/', detail_buying, name='detail-buying'),
     path('order/<pk>/update/', update_order, name='update-order'),
     path('order/<pk>/delete/', delete_order, name='delete-order'),
-    path('<pk>/', create_order, name='create-order'),
+    path('customer/<pk>/', get_customer, name='get-customer'),
+    path('<pk>/customer', create_buy_customer, name='create-buy-customer'),
+    path('<pk>/', create_buy_order, name='create-buy-order'),
+
+
 
 
     
