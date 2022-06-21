@@ -15,7 +15,7 @@ class Profile(models.Model):  # Customer
     admin = models.BooleanField(default=False)
     score = models.PositiveIntegerField(default=0)
     def __str__(self) -> str:
-        return f'{self.name} {self.code}'
+        return f'{self.code} {self.name} {self.score}'
 
 class Message(models.Model):
     profile = models.ForeignKey(Profile, on_delete=PROTECT)
