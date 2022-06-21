@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from cofbot.models import *
 import os 
+from datetime import datetime, timezone, timedelta
 from telegram.ext import Updater, CommandHandler, dispatcher
 from telegram.ext import MessageHandler, Filters, InlineQueryHandler
 import telegram
@@ -59,7 +60,7 @@ class Command(BaseCommand):
         text = 'Ваши заказы:'
         for buy in buys:
             o = Order.objects.filter(Buying=buy.id)
-            text += f'\nЗаказ {buy.Datetime.strftime("%d %B %Y в %H:%M")} стоимостью {buy.Cost}:\n'
+            text += f'\nЗаказ {(buy.Datetime+timedelta(hours=7)).strftime("%d %B %Y в %H:%M")} стоимостью {buy.Cost}:\n'
             for i in o:
                 print(i)
                 text += f'·{i.Product.Name} количество:{i.Count} цена:{i.Product.Price} \n'

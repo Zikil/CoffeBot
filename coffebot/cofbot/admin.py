@@ -63,7 +63,10 @@ class MessageAdmin(admin.ModelAdmin):
 
 @admin.register(Barista)
 class BaristaAdmin(admin.ModelAdmin):
-    list_display = ('ID_barista', 'Full_name')
+    list_display = ['User', 'full_name1']
+
+    def full_name1(self, obj):
+        return f'{obj.User.first_name} {obj.User.last_name}'
 
 
 @admin.register(Order)
