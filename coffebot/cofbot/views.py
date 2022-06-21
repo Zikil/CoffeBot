@@ -36,88 +36,105 @@ def create_buy_order(request, pk):  # create order, select product
         'orders': orders,
     }
     if request.method == 'POST':
-        if form.is_valid():
-            print('----2----')
-            order = form.save(commit=False)
-            order.Buying = buying
-            # print(order)
-            order.save()
-            return redirect("detail-order", pk=order.id)
-            return redirect('detail-buying', pk=buy.id)
-        elif orders:
-            print('----1----')
-            buy = form2.save(commit=False)
-            try:
-                c = buy.Customer
-                b = buy.Barista
-            except:
-                print('error!1')
-                error = 'Add Customer or/and Barista!'
+        print(request.POST)
+        if 'create' in request.POST:
+            if orders:
+                print('----1----')
+                buy = form2.save(commit=False)
+                try:
+                    c = buy.Customer
+                    b = buy.Barista
+                except:
+                    print('error!1')
+                    error = 'Add Customer or/and Barista!'
+                    context['error'] = error
+                    return render(request, 'coffeshop/create_buy_order.html', context)
+                buy.id = buy.Check = pk
+                cost = 0
+                for order in orders:
+                    cost += Product.objects.get(id=order.Product.id).Price*order.Count
+                buy.Cost = cost
+                buy.save()
+                return redirect('create-buy-customer', pk=buy.id)
+            elif not orders:
+                print('----3----')
+                error = 'Add product!'
                 context['error'] = error
+                context['form2'] = form2
                 return render(request, 'coffeshop/create_buy_order.html', context)
-            buy.id = buy.Check = pk
-            cost = 0
-            for order in orders:
-                cost += Product.objects.get(id=order.Product.id).Price*order.Count
-            buy.Cost = cost
-            # print('-------------')
-            # print(buy)
-            # print('-------------')
-            # print(buying)
-            buy.save()
-            return redirect('create-buy-customer', pk=buy.id)
-        elif not orders:
-            print('----3----')
-            error = 'Add product!'
-            context['error'] = error
-            context['form2'] = form2
-            return render(request, 'coffeshop/create_buy_order.html', context)
         else:
-            print('----4----')
-            return render(request, 'coffeshop/create_buy_order.html', context)
+            if form.is_valid():
+                print('----2----')
+                order = form.save(commit=False)
+                order.Buying = buying
+                # print(order)
+                order.save()
+                return redirect("detail-order", pk=order.id)
+                return redirect('detail-buying', pk=buy.id)
+            else:
+                print('----5----')
+                return render(request, 'coffeshop/partials/order_form.html', context)
     return render(request, 'coffeshop/create_buy_order.html', context)
 
 
 def create_buy_customer(request, pk):
     buy = get_object_or_404(Buying, id=pk)
     orders = Order.objects.filter(Buying=buy)
-    form2 = BuyingForm(request.POST or None)
+    form2 = BuyingForm(request.POST or None, instance=buy)
     context = {
         'form2': form2,
         'buy': buy,
         'orders': orders,
+        'request': request,
     }
     if request.method == 'POST':
-        if form2.is_valid():
-            print('--1--')
-            print(buy)
-            b = form2.save(commit=False)
-            try:
-                c = b.Customer
-            except:
-                print('error!1')
-                error = 'Add Customer!'
+        print(request.POST)
+        if 'buy' in request.POST:
+            print('----1----')
+            p = get_object_or_404(Profile, id=buy.Customer.id)
+            c = 0
+            for order in orders:
+                c += Product.objects.get(id=order.Product.id).Price*order.Count
+            p.score += c*0.05
+            p.save()
+            context['c'] = p
+            return redirect('detail-buying', pk=buy.id)
+        elif 'add' in request.POST:
+            if form2.is_valid():
+                b = form2.save(commit=False)
+                try:
+                    c = b.Customer
+                except:
+                    print('error!1')
+                    error = 'Add Customer!'
+                    context['error'] = error
+                    return render(request, 'coffeshop/create_buy_customer.html', context)
+                context['c'] = c
+                buy.Customer = b.Customer
+                buy.save()
+                form2 = BuyingForm(request.POST or None, instance=buy)
+                context['minus'] = 'minus'
+                context['form2'] = form2
+                context['buy'] = buy
+                return render(request,  'coffeshop/create_buy_customer.html', context)
+            else:
+                print('--2--')
+                error = 'err!'
                 context['error'] = error
                 return render(request, 'coffeshop/create_buy_customer.html', context)
-            print(b)
-            print(b.Customer)
-            buy.Customer = b.Customer
-            c = cost = 0
-            for order in orders:
-                cost += Product.objects.get(id=order.Product.id).Price*order.Count
-                c += 1*order.Count
-            p = Profile.objects.get(id=buy.Customer.id)
-            p.score += c
-            p.save()
-            print(buy)
-            print(buy.id)
+        elif 'minus' in request.POST:
+            cus = get_object_or_404(Profile, id=buy.Customer.id)
+            buy.Cost -= cus.score
+            cus.score = 0
+            cus.save()
             buy.save()
-            return redirect('detail-buying', pk=buy.id)
-        else:
-            print('--2--')
-            error = 'err!'
-            context['error'] = error
+            form2 = BuyingForm(request.POST or None, instance=buy)
+            context['c'] = cus
+            context['minus'] = 'minus'
+            context['form2'] = form2
+            context['buy'] = buy
             return render(request, 'coffeshop/create_buy_customer.html', context)
+
     return render(request, 'coffeshop/create_buy_customer.html', context)
 
 
